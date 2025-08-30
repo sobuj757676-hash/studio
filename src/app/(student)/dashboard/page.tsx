@@ -4,10 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Calendar, AlertCircle, Bell, BookOpen } from 'lucide-react';
-import { exams, students } from '@/lib/placeholder-data';
+import { getExams, getStudents } from '@/lib/placeholder-data';
 
-export default function StudentDashboard() {
+export default async function StudentDashboard() {
+  const students = await getStudents();
   const student = students[0];
+  const exams = await getExams();
   const upcomingExams = exams.filter(e => e.status === 'Upcoming');
 
   return (

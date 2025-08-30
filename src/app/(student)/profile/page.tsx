@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { students } from '@/lib/placeholder-data';
+import { getStudents } from '@/lib/placeholder-data';
 import { Button } from '@/components/ui/button';
 
 function ProfileDetail({ label, value }: { label: string; value: string | undefined }) {
@@ -13,7 +13,8 @@ function ProfileDetail({ label, value }: { label: string; value: string | undefi
   );
 }
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const students = await getStudents();
   const student = students[0]; // Placeholder for logged-in student
 
   return (

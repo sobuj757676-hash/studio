@@ -14,7 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { recentActivities, students } from '@/lib/placeholder-data';
+import { getRecentActivities, getStudents } from '@/lib/placeholder-data';
 import { Users, BookOpenCheck, Wallet, CircleDollarSign, Activity } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -40,10 +40,13 @@ function StatCard({ title, value, icon: Icon, description }: StatCardProps) {
   );
 }
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+    const students = await getStudents();
+    const recentActivities = await getRecentActivities();
+
     const totalStudents = students.length;
     const totalRevenue = 25000;
-    const outstandingBills = 2;
+    const outstandingBills = students.filter(s => s.dues > 0).length;
     const attendance = 92.5;
 
   return (
@@ -71,7 +74,7 @@ export default function AdminDashboard() {
             title="Outstanding Bills" 
             value={outstandingBills.toString()} 
             icon={Wallet} 
-            description="Totaling $75.00" 
+            description={`Totaling $${students.reduce((acc, s) => acc + s.dues, 0).toFixed(2)}`} 
         />
       </div>
 

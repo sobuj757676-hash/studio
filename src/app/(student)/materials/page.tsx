@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { courses, students } from '@/lib/placeholder-data';
+import { getCourses, getStudents } from '@/lib/placeholder-data';
 import { File, Video, FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -10,8 +10,10 @@ const iconMap = {
     notes: FileText,
 }
 
-export default function MaterialsPage() {
+export default async function MaterialsPage() {
+    const students = await getStudents();
     const student = students[0];
+    const courses = await getCourses();
     const studentCourse = courses.find(c => c.name === student.course);
 
     if (!studentCourse) {

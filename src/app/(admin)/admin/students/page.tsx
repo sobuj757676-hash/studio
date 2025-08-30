@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { students } from '@/lib/placeholder-data';
+import { getStudents } from '@/lib/placeholder-data';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 
-export default function StudentsPage() {
+export default async function StudentsPage() {
+  const students = await getStudents();
+  
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">

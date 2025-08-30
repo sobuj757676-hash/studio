@@ -11,10 +11,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { exams, examQuestions } from '@/lib/placeholder-data';
+import { getExams, getExamQuestions, type Exam, type ExamQuestion } from '@/lib/placeholder-data';
 import { Timer, FileQuestion } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const examSchema = z.object({
   answers: z.record(z.string()),
@@ -28,10 +29,29 @@ export default function ExamTakingPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
+  const [exam, setExam] = React.useState<Exam | null>(null);
+  const [questions, setQuestions] = React.useState<ExamQuestion[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
   const examId = Array.isArray(params.id) ? params.id[0] : params.id;
-  const exam = exams.find((e) => e.id === examId);
-  const questions = examId ? examQuestions[examId] || [] : [];
+
+  React.useEffect(() => {
+    if (!examId) return;
+    
+    const fetchExamData = async () => {
+      setLoading(true);
+      const allExams = await getExams();
+      const currentExam = allExams.find((e) => e.id === examId) || null;
+      setExam(currentExam);
+
+      if (currentExam) {
+        const examQuestions = await getExamQuestions(examId);
+        setQuestions(examQuestions);
+      }
+      setLoading(false);
+    }
+    fetchExamData();
+  }, [examId]);
 
   const form = useForm<ExamFormValues>({
     resolver: zodResolver(examSchema),
@@ -39,6 +59,10 @@ export default function ExamTakingPage() {
       answers: {},
     },
   });
+  
+  if (loading) {
+    return <ExamLoadingSkeleton />;
+  }
 
   if (!exam) {
     return (
@@ -166,5 +190,37 @@ export default function ExamTakingPage() {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+function ExamLoadingSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <div className="flex items-center gap-4 text-sm font-medium">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-6 w-24" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        {[...Array(3)].map((_, index) => (
+          <div key={index}>
+            <Skeleton className="h-6 w-3/4 mb-4" />
+            <div className="space-y-3 pl-4">
+              <Skeleton className="h-5 w-1/2" />
+              <Skeleton className="h-5 w-1/3" />
+              <Skeleton className="h-5 w-2/5" />
+            </div>
+            {index < 2 && <Separator className="mt-8" />}
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 }

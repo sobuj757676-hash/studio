@@ -1,12 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { transactions, students } from '@/lib/placeholder-data';
+import { getTransactions, getStudents } from '@/lib/placeholder-data';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
 
-export default function TransactionsPage() {
+export default async function TransactionsPage() {
+    const students = await getStudents();
     const student = students[0];
+    const transactions = await getTransactions();
     const studentTransactions = transactions.filter(t => t.studentId === student.id);
   return (
     <Card>

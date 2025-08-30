@@ -32,13 +32,14 @@ import {
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
-import { students } from '@/lib/placeholder-data';
+import { getStudents } from '@/lib/placeholder-data';
 
-export default function StudentLayout({
+export default async function StudentLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const students = await getStudents();
   const student = students[0]; // Placeholder for logged-in student
 
   return (

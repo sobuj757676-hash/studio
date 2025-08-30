@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { students } from '@/lib/placeholder-data';
+import { getStudents } from '@/lib/placeholder-data';
 import Image from 'next/image';
 
-export default function DuesPage() {
+export default async function DuesPage() {
+    const students = await getStudents();
     const studentsWithDues = students.filter(s => s.dues > 0);
   return (
     <Card>

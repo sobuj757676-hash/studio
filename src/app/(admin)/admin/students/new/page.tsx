@@ -6,6 +6,7 @@ import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import React from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { courses } from '@/lib/placeholder-data';
+import { getCourses, Course } from '@/lib/placeholder-data';
 import { useToast } from '@/hooks/use-toast';
 
 const studentFormSchema = z.object({
@@ -34,6 +35,15 @@ type StudentFormValues = z.infer<typeof studentFormSchema>;
 export default function NewStudentPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [courses, setCourses] = React.useState<Course[]>([]);
+
+  React.useEffect(() => {
+    async function fetchCourses() {
+        const fetchedCourses = await getCourses();
+        setCourses(fetchedCourses);
+    }
+    fetchCourses();
+  }, []);
 
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentFormSchema),

@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { transactions } from '@/lib/placeholder-data';
+import { getTransactions } from '@/lib/placeholder-data';
 
-export default function TransactionsPage() {
+export default async function TransactionsPage() {
+  const transactions = await getTransactions();
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">

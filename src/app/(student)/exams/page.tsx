@@ -1,14 +1,14 @@
-'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { exams } from '@/lib/placeholder-data';
+import { getExams, type Exam } from '@/lib/placeholder-data';
 import { PlayCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function ExamsPage() {
+export default async function ExamsPage() {
+    const exams = await getExams();
     const upcomingExams = exams.filter(e => e.status === 'Upcoming' || e.status === 'Ongoing');
     const completedExams = exams.filter(e => e.status === 'Completed');
 
@@ -36,7 +36,7 @@ export default function ExamsPage() {
   );
 }
 
-function ExamTable({ exams, isCompleted }: { exams: typeof import('@/lib/placeholder-data').exams; isCompleted: boolean }) {
+function ExamTable({ exams, isCompleted }: { exams: Exam[]; isCompleted: boolean }) {
     if (exams.length === 0) {
         return (
             <div className="text-center py-16">

@@ -5,10 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { exams } from '@/lib/placeholder-data';
+import { getExams, type Exam } from '@/lib/placeholder-data';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-export default function ExamsPage() {
+export default async function ExamsPage() {
+  const exams = await getExams();
   const upcomingExams = exams.filter(e => e.status === 'Upcoming');
   const completedExams = exams.filter(e => e.status === 'Completed');
 
@@ -73,7 +74,7 @@ export default function ExamsPage() {
   );
 }
 
-function ExamTable({ exams }: { exams: typeof import('@/lib/placeholder-data').exams }) {
+function ExamTable({ exams }: { exams: Exam[] }) {
     return (
         <Table>
             <TableHeader>

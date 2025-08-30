@@ -1,7 +1,7 @@
 import { PlusCircle, File, Video, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { courses } from '@/lib/placeholder-data';
+import { getCourses } from '@/lib/placeholder-data';
 import {
   Accordion,
   AccordionContent,
@@ -15,7 +15,8 @@ const iconMap = {
     notes: FileText,
 }
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const courses = await getCourses();
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
