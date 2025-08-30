@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
     console.error('Middleware verification error:', error);
     // If verification fails, redirect to login
     if (isStudentRoute) {
-      return NextResponse.redirect(studentLoginUr);
+      return NextResponse.redirect(studentLoginUrl);
     }
     if (isAdminRoute) {
       return NextResponse.redirect(adminLoginUrl);

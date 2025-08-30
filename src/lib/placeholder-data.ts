@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc, addDoc, updateDoc, serverTimestamp, where, query } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, setDoc, serverTimestamp, where, query } from 'firebase/firestore';
 
 export type Student = {
   id: string;
@@ -105,11 +105,12 @@ export const addStudent = async (studentData: Omit<Student, 'id' | 'studentId' |
     try {
         // The document ID will become the user's UID in Firebase Auth
         const studentRef = doc(collection(db, "students"));
-
-        const studentId = studentRef.id.substring(0, 6).toUpperCase();
+        
+        // Use the first 6 chars of the doc ID for a shorter, but still unique student ID.
+        const studentId = `ET${studentRef.id.substring(0, 6).toUpperCase()}`;
         const password = Math.random().toString(36).slice(-8);
 
-        await updateDoc(studentRef, {
+        await setDoc(studentRef, {
             ...studentData,
             studentId: studentId,
             password: password, // Storing password in plaintext, NOT FOR PRODUCTION
