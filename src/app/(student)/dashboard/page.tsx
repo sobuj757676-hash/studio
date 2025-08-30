@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +12,19 @@ export default async function StudentDashboard() {
   const student = students[0];
   const exams = await getExams();
   const upcomingExams = exams.filter(e => e.status === 'Upcoming');
+
+  if (!student) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Error</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p>Could not load student data. Please try again later.</p>
+            </CardContent>
+        </Card>
+    )
+  }
 
   return (
     <div className="space-y-6">
