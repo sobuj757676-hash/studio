@@ -43,6 +43,13 @@ export type Exam = {
     totalMarks: number;
 }
 
+export type ExamQuestion = {
+    id: string;
+    question: string;
+    options: string[];
+    correctAnswer: string;
+}
+
 export const students: Student[] = [
   { id: 'ET001', name: 'Alice Johnson', email: 'alice@example.com', photo: 'https://picsum.photos/100/100?random=1', course: 'Web Development', joiningDate: '2023-01-15', dues: 0, dob: '2002-05-20', guardianName: 'John Johnson', phone: '123-456-7890', address: '123 Web St, Codetown' },
   { id: 'ET002', name: 'Bob Williams', email: 'bob@example.com', photo: 'https://picsum.photos/100/100?random=2', course: 'Data Science', joiningDate: '2023-02-01', dues: 50, dob: '2001-08-12', guardianName: 'Barbara Williams', phone: '123-456-7891', address: '456 Data Dr, Analystville' },
@@ -84,11 +91,22 @@ export const transactions: Transaction[] = [
 ];
 
 export const exams: Exam[] = [
-    { id: 'E01', subject: 'JavaScript Basics', type: 'MCQ', date: '2024-08-15', status: 'Upcoming', totalMarks: 100 },
+    { id: 'E01', subject: 'JavaScript Basics', type: 'MCQ', date: '2024-08-15', status: 'Ongoing', totalMarks: 10 },
     { id: 'E02', subject: 'CSS Layouts', type: 'Practical', date: '2024-07-20', status: 'Completed', score: 85, totalMarks: 100 },
     { id: 'E03', subject: 'Python Data Structures', type: 'MCQ', date: '2024-07-10', status: 'Completed', score: 92, totalMarks: 100 },
     { id: 'E04', subject: 'Figma Prototyping', type: 'Practical', date: '2024-09-01', status: 'Upcoming', totalMarks: 100 },
 ];
+
+export const examQuestions: Record<string, ExamQuestion[]> = {
+    'E01': [
+        { id: 'Q1', question: 'What is the correct way to declare a variable in JavaScript?', options: ['var myVar;', 'variable myVar;', 'v myVar;'], correctAnswer: 'var myVar;' },
+        { id: 'Q2', question: 'Which company developed JavaScript?', options: ['Microsoft', 'Netscape', 'Google'], correctAnswer: 'Netscape' },
+        { id: 'Q3', question: 'What does "DOM" stand for?', options: ['Document Object Model', 'Data Object Model', 'Desktop Object Management'], correctAnswer: 'Document Object Model' },
+        { id: 'Q4', question: 'Which of the following is NOT a JavaScript framework?', options: ['React', 'Angular', 'Laravel'], correctAnswer: 'Laravel' },
+        { id: 'Q5', question: 'How do you write a single line comment in JavaScript?', options: ['// This is a comment', '<!-- This is a comment -->', '/* This is a comment */'], correctAnswer: '// This is a comment' },
+    ],
+};
+
 
 export const recentActivities = [
     { id: 1, description: 'New student "Diana Prince" was registered.', time: '2 hours ago' },

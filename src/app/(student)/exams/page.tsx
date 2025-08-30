@@ -1,3 +1,4 @@
+'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -5,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { exams } from '@/lib/placeholder-data';
 import { PlayCircle } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ExamsPage() {
     const upcomingExams = exams.filter(e => e.status === 'Upcoming' || e.status === 'Ongoing');
@@ -72,10 +74,12 @@ function ExamTable({ exams, isCompleted }: { exams: typeof import('@/lib/placeho
                             {isCompleted ? (
                                 <Badge variant="secondary">Completed</Badge>
                             ) : exam.status === 'Ongoing' ? (
-                                <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
-                                    <PlayCircle className="mr-2 h-4 w-4" />
-                                    Start Exam
-                                </Button>
+                                <Link href={`/exam/${exam.id}`}>
+                                    <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                                        <PlayCircle className="mr-2 h-4 w-4" />
+                                        Start Exam
+                                    </Button>
+                                </Link>
                             ) : (
                                 <Badge variant="outline">Upcoming</Badge>
                             )}
