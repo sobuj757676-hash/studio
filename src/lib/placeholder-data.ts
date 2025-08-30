@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc } from 'firebase/firestore';
 
 export type Student = {
   id: string;
@@ -19,6 +19,7 @@ export type Course = {
   id: string;
   name: string;
   duration: string;
+  description?: string;
   materials: {
     id: string;
     type: 'pdf' | 'video' | 'notes';
@@ -83,4 +84,16 @@ export const getExamQuestions = async (examId: string): Promise<ExamQuestion[]> 
     const questionsCollection = collection(db, `exams/${examId}/questions`);
     const querySnapshot = await getDocs(questionsCollection);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ExamQuestion));
+};
+
+export const addCourse = async (course: Omit<Course, 'id' | 'materials'>) => {
+    try {
+        await addDoc(collection(db, "courses"), {
+            ...course,
+            materials: [] 
+        });
+    } catch (e) {
+        console.error("Error adding document: ", e);
+        throw e;
+    }
 };

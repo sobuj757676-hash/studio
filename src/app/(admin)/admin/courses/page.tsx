@@ -1,4 +1,5 @@
 import { PlusCircle, File, Video, FileText } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCourses } from '@/lib/placeholder-data';
@@ -24,10 +25,12 @@ export default async function CoursesPage() {
           <CardTitle>Course Management</CardTitle>
           <CardDescription>Upload and manage materials for each course.</CardDescription>
         </div>
-        <Button size="sm" className="gap-1">
-          <PlusCircle className="h-4 w-4" />
-          Add Course
-        </Button>
+        <Link href="/admin/courses/new">
+          <Button size="sm" className="gap-1">
+            <PlusCircle className="h-4 w-4" />
+            Add Course
+          </Button>
+        </Link>
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible className="w-full">
