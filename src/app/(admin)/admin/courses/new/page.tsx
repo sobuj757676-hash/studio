@@ -27,6 +27,11 @@ export default function NewCoursePage() {
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
+    defaultValues: {
+      name: '',
+      duration: '',
+      description: '',
+    },
   });
 
   async function onSubmit(data: CourseFormValues) {
