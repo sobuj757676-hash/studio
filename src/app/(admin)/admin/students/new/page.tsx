@@ -162,10 +162,10 @@ export default function NewStudentPage() {
             return <Input placeholder="123 Main St, Anytown, USA" {...field} />;
         case 'admissionFee':
             return (
-                <>
+                <div>
                     <Input type="number" placeholder="500" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} />
                     <FormDescription>This will be recorded as the first transaction.</FormDescription>
-                </>
+                </div>
             );
         case 'dob':
             return (
