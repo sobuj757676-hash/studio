@@ -121,10 +121,14 @@ export default function NewStudentPage() {
     try {
         const courseName = courses.find(c => c.id === data.courseId)?.name || 'Unknown Course';
         const submissionData = {
-            ...data,
+            name: data.fullName,
+            email: data.email ?? '',
+            phone: data.phone ?? '',
             dob: data.dob ? format(data.dob, 'yyyy-MM-dd') : '',
-            dues: data.admissionFee ? data.admissionFee : 0,
+            guardianName: data.guardianName ?? '',
+            address: data.address ?? '',
             course: courseName,
+            dues: data.admissionFee ? data.admissionFee : 0,
             joiningDate: format(new Date(), 'yyyy-MM-dd'),
             photo: `https://picsum.photos/seed/${data.fullName}/100/100`
         };
