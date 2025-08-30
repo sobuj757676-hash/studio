@@ -1,7 +1,7 @@
 'use server';
 
 import { getAuth, signInWithEmailAndPassword, signInWithCustomToken } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAdminApp } from './firebase-admin';
 import { cookies }from 'next/headers';
@@ -25,6 +25,8 @@ export async function signInWithStudentId(studentId: string, password: string) {
     const studentDoc = querySnapshot.docs[0];
     const student = studentDoc.data() as Student;
 
+    // In a real app, you would hash and compare passwords.
+    // For this example, we are comparing plaintext.
     if (student.password !== password) {
         throw new Error("Invalid password.");
     }
