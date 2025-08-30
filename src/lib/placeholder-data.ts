@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, updateDoc, serverTimestamp, where, query } from 'firebase/firestore';
 
 export type Student = {
   id: string;
@@ -57,7 +57,7 @@ export type ExamQuestion = {
 }
 
 export type RecentActivity = {
-    id: number;
+    id: string;
     description: string;
     time: string;
 }
@@ -77,6 +77,7 @@ async function fetchDoc<T>(collectionName: string, docId: string): Promise<T | n
 }
 
 export const getStudents = () => fetchData<Student>('students');
+export const getStudentById = (id: string) => fetchDoc<Student>('students', id);
 export const getCourses = () => fetchData<Course>('courses');
 export const getTransactions = () => fetchData<Transaction>('transactions');
 export const getExams = () => fetchData<Exam>('exams');
@@ -100,23 +101,21 @@ export const addCourse = async (course: Omit<Course, 'id' | 'materials'>) => {
     }
 };
 
-export const addStudent = async (studentData: Omit<Student, 'id' | 'studentId'>) => {
+export const addStudent = async (studentData: Omit<Student, 'id' | 'studentId' | 'photo' | 'dues' > & {dues: number, photo: string}) => {
     try {
-        const studentRef = await addDoc(collection(db, "students"), {
-            ...studentData,
-            studentId: '', // placeholder
-            password: '', // placeholder
-            createdAt: serverTimestamp(),
-        });
+        // The document ID will become the user's UID in Firebase Auth
+        const studentRef = doc(collection(db, "students"));
 
         const studentId = studentRef.id.substring(0, 6).toUpperCase();
         const password = Math.random().toString(36).slice(-8);
 
         await updateDoc(studentRef, {
+            ...studentData,
             studentId: studentId,
-            password: password
+            password: password, // Storing password in plaintext, NOT FOR PRODUCTION
+            createdAt: serverTimestamp(),
         });
-
+        
         // Also record the admission fee as the first transaction
         if (studentData.dues > 0) {
             await addDoc(collection(db, "transactions"), {

@@ -1,35 +1,43 @@
-
+'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Calendar, AlertCircle, Bell, BookOpen } from 'lucide-react';
-import { getExams, getStudents } from '@/lib/placeholder-data';
+import { getExams } from '@/lib/placeholder-data';
+import { useAuth } from '@/hooks/use-auth';
+import { useEffect, useState } from 'react';
+import type { Exam } from '@/lib/placeholder-data';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default async function StudentDashboard() {
-  const students = await getStudents();
-  const student = students[0];
-  const exams = await getExams();
-  const upcomingExams = exams.filter(e => e.status === 'Upcoming');
+export default function StudentDashboard() {
+  const { user } = useAuth();
+  const [upcomingExams, setUpcomingExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!student) {
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Error</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p>Could not load student data. Please log in again or contact support.</p>
-            </CardContent>
-        </Card>
-    )
+  useEffect(() => {
+    const fetchPageData = async () => {
+        try {
+            const exams = await getExams();
+            setUpcomingExams(exams.filter(e => e.status === 'Upcoming'));
+        } catch (error) {
+            console.error("Failed to fetch exams", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchPageData();
+  }, []);
+
+  if (loading || !user) {
+    return <DashboardSkeleton />;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-0.5">
-          <h2 className="text-2xl font-bold tracking-tight">Welcome back, {student.name.split(' ')[0]}!</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Welcome back, {user.name?.split(' ')[0] || 'Student'}!</h2>
           <p className="text-muted-foreground">Here's a summary of your academic progress and activities.</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -39,7 +47,7 @@ export default async function StudentDashboard() {
                 <BookOpen className="h-5 w-5 text-primary" />
                 <span>Course Progress</span>
             </CardTitle>
-            <CardDescription>{student.course}</CardDescription>
+            <CardDescription>{user.course}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Progress value={65} className="w-full" />
@@ -77,9 +85,9 @@ export default async function StudentDashboard() {
             <CardDescription>Your current financial standing.</CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            {student.dues > 0 ? (
+            {user.dues > 0 ? (
                 <>
-                    <p className="text-3xl font-bold text-destructive">${student.dues.toFixed(2)}</p>
+                    <p className="text-3xl font-bold text-destructive">${user.dues.toFixed(2)}</p>
                     <Badge variant="destructive">DUE</Badge>
                      <Link href="/transactions" className="w-full block pt-2">
                         <Button className="w-full" variant="destructive">Pay Now</Button>
@@ -119,3 +127,28 @@ export default async function StudentDashboard() {
     </div>
   );
 }
+
+function DashboardSkeleton() {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col space-y-2">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+                 <Card key={i}>
+                    <CardHeader>
+                        <Skeleton className="h-6 w-32 mb-2" />
+                        <Skeleton className="h-4 w-48" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+      </div>
+    )
+  }

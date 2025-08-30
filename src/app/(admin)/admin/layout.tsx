@@ -1,3 +1,4 @@
+'use client';
 import Link from 'next/link';
 import {
   Bell,
@@ -32,17 +33,18 @@ import {
   SidebarInset,
   SidebarFooter,
   SidebarTrigger,
-  SidebarGroup,
-  SidebarGroupLabel,
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, logout } = useAuth();
+  
   return (
     <SidebarProvider>
       <Sidebar>
@@ -150,24 +152,24 @@ export default function AdminLayout({
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Admin User</p>
+                    <p className="text-sm font-medium leading-none">{user?.name}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      admin@edutraq.com
+                      {user?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                <DropdownMenuItem asChild>
+                   <Link href="/admin/settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <Link href="/admin/login">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>
-                </Link>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

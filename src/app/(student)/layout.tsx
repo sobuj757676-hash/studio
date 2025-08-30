@@ -1,4 +1,4 @@
-
+'use client';
 import Link from 'next/link';
 import {
   Bell,
@@ -33,16 +33,15 @@ import {
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
-import { getStudents } from '@/lib/placeholder-data';
+import { useAuth } from '@/hooks/use-auth';
 
-export default async function StudentLayout({
+export default function StudentLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const students = await getStudents();
-  const student = students[0]; // Placeholder for logged-in student
-
+  const { user, logout } = useAuth();
+  
   return (
     <SidebarProvider>
       <Sidebar>
@@ -121,34 +120,32 @@ export default async function StudentLayout({
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar>
-                    {student && <AvatarImage src={student.photo} alt={student.name} data-ai-hint="student photo" />}
-                    <AvatarFallback>{student?.name?.charAt(0) ?? 'S'}</AvatarFallback>
+                    {user && <AvatarImage src={user.photo} alt={user.name} data-ai-hint="student photo" />}
+                    <AvatarFallback>{user?.name?.charAt(0) ?? 'S'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{student?.name ?? 'Student User'}</p>
+                    <p className="text-sm font-medium leading-none">{user?.name ?? 'Student User'}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {student?.email ?? 'student@example.com'}
+                      {user?.email ?? 'student@example.com'}
                     </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <Link href="/profile">
-                    <DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href="/profile">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
-                    </DropdownMenuItem>
-                </Link>
+                    </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <Link href="/login">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>
-                </Link>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

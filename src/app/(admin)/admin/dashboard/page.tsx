@@ -1,3 +1,4 @@
+'use client';
 import {
   Card,
   CardContent,
@@ -14,9 +15,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { getRecentActivities, getStudents } from '@/lib/placeholder-data';
+import { getRecentActivities, getStudents, Student, RecentActivity } from '@/lib/placeholder-data';
 import { Users, BookOpenCheck, Wallet, CircleDollarSign, Activity } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface StatCardProps {
   title: string;
@@ -40,14 +43,37 @@ function StatCard({ title, value, icon: Icon, description }: StatCardProps) {
   );
 }
 
-export default async function AdminDashboard() {
-    const students = await getStudents();
-    const recentActivities = await getRecentActivities();
+export default function AdminDashboard() {
+    const [students, setStudents] = useState<Student[]>([]);
+    const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      async function loadDashboardData() {
+        try {
+          const [studentsData, activitiesData] = await Promise.all([
+            getStudents(),
+            getRecentActivities()
+          ]);
+          setStudents(studentsData);
+          setRecentActivities(activitiesData);
+        } catch (error) {
+          console.error("Failed to load dashboard data", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+      loadDashboardData();
+    }, []);
+
+    if (loading) {
+      return <DashboardSkeleton />;
+    }
 
     const totalStudents = students.length;
-    const totalRevenue = 25000;
+    const totalRevenue = 25000; // placeholder
     const outstandingBills = students.filter(s => s.dues > 0).length;
-    const attendance = 92.5;
+    const attendance = 92.5; // placeholder
 
   return (
     <div className="space-y-6">
@@ -134,4 +160,54 @@ export default async function AdminDashboard() {
       </div>
     </div>
   );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-4" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-16 mb-1" />
+              <Skeleton className="h-3 w-24" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="lg:col-span-4">
+          <CardHeader>
+            <Skeleton className="h-6 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-3">
+          <CardHeader>
+             <Skeleton className="h-6 w-40" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-start gap-4">
+                <Skeleton className="h-3 w-3 rounded-full mt-1" />
+                <div className="space-y-1 w-full">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
 }
