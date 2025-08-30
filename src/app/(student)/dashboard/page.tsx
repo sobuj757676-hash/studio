@@ -20,7 +20,7 @@ export default async function StudentDashboard() {
                 <CardTitle>Error</CardTitle>
             </CardHeader>
             <CardContent>
-                <p>Could not load student data. Please try again later.</p>
+                <p>Could not load student data. Please log in again or contact support.</p>
             </CardContent>
         </Card>
     )
