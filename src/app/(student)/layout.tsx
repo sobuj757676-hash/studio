@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import {
   Bell,
@@ -120,17 +121,17 @@ export default async function StudentLayout({
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar>
-                    <AvatarImage src={student.photo} alt={student.name} data-ai-hint="student photo" />
-                    <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+                    {student && <AvatarImage src={student.photo} alt={student.name} data-ai-hint="student photo" />}
+                    <AvatarFallback>{student?.name?.charAt(0) ?? 'S'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{student.name}</p>
+                    <p className="text-sm font-medium leading-none">{student?.name ?? 'Student User'}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {student.email}
+                      {student?.email ?? 'student@example.com'}
                     </p>
                   </div>
                 </DropdownMenuLabel>
