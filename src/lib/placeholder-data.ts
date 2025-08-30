@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc, addDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export type Student = {
   id: string;
@@ -97,3 +97,28 @@ export const addCourse = async (course: Omit<Course, 'id' | 'materials'>) => {
         throw e;
     }
 };
+
+export const addStudent = async (studentData: Omit<Student, 'id'>) => {
+    try {
+        const studentRef = await addDoc(collection(db, "students"), {
+            ...studentData,
+            createdAt: serverTimestamp(),
+        });
+
+        // Also record the admission fee as the first transaction
+        if (studentData.dues > 0) {
+            await addDoc(collection(db, "transactions"), {
+                studentId: studentRef.id,
+                studentName: studentData.name,
+                amount: studentData.dues,
+                purpose: 'Admission',
+                date: studentData.joiningDate,
+                createdAt: serverTimestamp(),
+            });
+        }
+        
+    } catch (e) {
+        console.error("Error adding student: ", e);
+        throw e;
+    }
+}
