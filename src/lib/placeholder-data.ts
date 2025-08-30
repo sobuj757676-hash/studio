@@ -1,8 +1,9 @@
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 export type Student = {
   id: string;
+  studentId: string;
   name: string;
   email: string;
   photo: string;
@@ -13,6 +14,7 @@ export type Student = {
   guardianName: string;
   phone: string;
   address: string;
+  password?: string;
 };
 
 export type Course = {
@@ -98,17 +100,27 @@ export const addCourse = async (course: Omit<Course, 'id' | 'materials'>) => {
     }
 };
 
-export const addStudent = async (studentData: Omit<Student, 'id'>) => {
+export const addStudent = async (studentData: Omit<Student, 'id' | 'studentId'>) => {
     try {
         const studentRef = await addDoc(collection(db, "students"), {
             ...studentData,
+            studentId: '', // placeholder
+            password: '', // placeholder
             createdAt: serverTimestamp(),
+        });
+
+        const studentId = studentRef.id.substring(0, 6).toUpperCase();
+        const password = Math.random().toString(36).slice(-8);
+
+        await updateDoc(studentRef, {
+            studentId: studentId,
+            password: password
         });
 
         // Also record the admission fee as the first transaction
         if (studentData.dues > 0) {
             await addDoc(collection(db, "transactions"), {
-                studentId: studentRef.id,
+                studentId: studentId,
                 studentName: studentData.name,
                 amount: studentData.dues,
                 purpose: 'Admission',
@@ -116,6 +128,8 @@ export const addStudent = async (studentData: Omit<Student, 'id'>) => {
                 createdAt: serverTimestamp(),
             });
         }
+
+        return { studentId, password };
         
     } catch (e) {
         console.error("Error adding student: ", e);

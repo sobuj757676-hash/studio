@@ -23,6 +23,7 @@ import { db } from '@/lib/firebase';
 import type { StudentFormField } from '@/app/(admin)/admin/settings/page';
 import { initialFields } from '@/app/(admin)/admin/settings/page';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const baseSchema = {
   fullName: z.string().min(2, 'Full name must be at least 2 characters.'),
@@ -44,6 +45,8 @@ export default function NewStudentPage() {
   const [loading, setLoading] = React.useState(true);
   const [formFields, setFormFields] = React.useState<StudentFormField[]>(initialFields);
   const [studentFormSchema, setStudentFormSchema] = React.useState(z.object(baseSchema));
+  const [showCredentialsDialog, setShowCredentialsDialog] = React.useState(false);
+  const [generatedCredentials, setGeneratedCredentials] = React.useState({ studentId: '', password: '' });
 
   React.useEffect(() => {
     async function fetchDependencies() {
@@ -71,7 +74,6 @@ export default function NewStudentPage() {
             const dynamicSchema = enabledFields.reduce((schema, field) => {
               const fieldSchema = baseSchema[field.id as keyof typeof baseSchema];
               if (field.required && fieldSchema) {
-                // make it required
                 if (fieldSchema instanceof z.ZodOptional) {
                      schema[field.id] = fieldSchema.unwrap();
                 } else {
@@ -133,15 +135,15 @@ export default function NewStudentPage() {
             photo: `https://picsum.photos/seed/${data.fullName}/100/100`
         };
 
-        await addStudent(submissionData);
+        const credentials = await addStudent(submissionData);
         
-        toast({
-            title: "Student Registered!",
-            description: `Successfully enrolled ${data.fullName}.`,
-            className: 'bg-accent text-accent-foreground'
-        });
+        if (credentials) {
+            setGeneratedCredentials(credentials);
+            setShowCredentialsDialog(true);
+        } else {
+             throw new Error("Credentials were not generated.");
+        }
         
-        router.push('/admin/students');
     } catch (error) {
         console.error("Error registering student: ", error);
         toast({
@@ -218,12 +220,23 @@ export default function NewStudentPage() {
             return null;
     }
   };
+  
+  const handleDialogClose = () => {
+    setShowCredentialsDialog(false);
+    toast({
+        title: "Student Registered!",
+        description: `Successfully enrolled ${form.getValues('fullName')}.`,
+        className: 'bg-accent text-accent-foreground'
+    });
+    router.push('/admin/students');
+  };
 
   if (loading) {
     return <NewStudentLoadingSkeleton />;
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle>New Student Registration</CardTitle>
@@ -259,6 +272,31 @@ export default function NewStudentPage() {
         </Form>
       </CardContent>
     </Card>
+
+    <AlertDialog open={showCredentialsDialog} onOpenChange={setShowCredentialsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Student Registered Successfully!</AlertDialogTitle>
+            <AlertDialogDescription>
+                Please save the following credentials and share them with the student for portal access. This information will not be shown again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="my-4 space-y-2 rounded-md border bg-muted p-4">
+            <div className="flex justify-between">
+                <span className="text-sm font-medium text-muted-foreground">Student ID:</span>
+                <span className="text-sm font-semibold font-mono">{generatedCredentials.studentId}</span>
+            </div>
+             <div className="flex justify-between">
+                <span className="text-sm font-medium text-muted-foreground">Password:</span>
+                <span className="text-sm font-semibold font-mono">{generatedCredentials.password}</span>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleDialogClose}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 

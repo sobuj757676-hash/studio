@@ -39,6 +39,7 @@ export default async function StudentsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Student</TableHead>
+              <TableHead>Student ID</TableHead>
               <TableHead>Course</TableHead>
               <TableHead>Joining Date</TableHead>
               <TableHead>Dues</TableHead>
@@ -65,6 +66,9 @@ export default async function StudentsPage() {
                       <div className="text-sm text-muted-foreground">{student.email}</div>
                     </div>
                   </div>
+                </TableCell>
+                <TableCell>
+                    <Badge variant="outline">{student.studentId}</Badge>
                 </TableCell>
                 <TableCell>{student.course}</TableCell>
                 <TableCell>{student.joiningDate}</TableCell>
