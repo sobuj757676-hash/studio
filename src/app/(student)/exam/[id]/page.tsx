@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,14 +22,16 @@ const examSchema = z.object({
 
 type ExamFormValues = z.infer<typeof examSchema>;
 
-export default function ExamTakingPage({ params }: { params: { id: string } }) {
+export default function ExamTakingPage() {
   const router = useRouter();
+  const params = useParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 
-  const exam = exams.find((e) => e.id === params.id);
-  const questions = examQuestions[params.id] || [];
+  const examId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const exam = exams.find((e) => e.id === examId);
+  const questions = examId ? examQuestions[examId] || [] : [];
 
   const form = useForm<ExamFormValues>({
     resolver: zodResolver(examSchema),
@@ -69,8 +71,8 @@ export default function ExamTakingPage({ params }: { params: { id: string } }) {
   };
   
   const handleSubmitClick = () => {
-    const allAnswered = Object.keys(form.getValues('answers')).length === questions.length;
-    if (!allAnswered) {
+    const answeredQuestions = Object.keys(form.getValues('answers')).filter(key => form.getValues('answers')[key]).length;
+    if (answeredQuestions !== questions.length) {
         toast({
             variant: "destructive",
             title: "Incomplete Exam",
