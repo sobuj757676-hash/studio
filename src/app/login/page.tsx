@@ -6,6 +6,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { getAuth, signInWithCustomToken } from 'firebase/auth';
+import { collection, query, where, getDocs, getFirestore } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +16,8 @@ import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/icons';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { app } from '@/lib/firebase';
+import type { Student } from '@/lib/placeholder-data';
 
 const loginSchema = z.object({
   studentId: z.string().min(1, 'Student ID is required.'),
@@ -26,6 +30,8 @@ export default function StudentLoginPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -38,15 +44,49 @@ export default function StudentLoginPage() {
     const handleLogin = async (data: LoginFormValues) => {
         setIsLoading(true);
         try {
-            const response = await fetch('/api/login', {
+            // 1. Find the student by studentId
+            const studentsRef = collection(db, 'students');
+            const q = query(studentsRef, where("studentId", "==", data.studentId));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                throw new Error("Student not found.");
+            }
+            const studentDoc = querySnapshot.docs[0];
+            const student = studentDoc.data() as Student;
+
+            // 2. Verify password (insecure, for demo purposes)
+            if (student.password !== data.password) {
+                throw new Error("Invalid password.");
+            }
+
+            // 3. Get a custom token from a new API route
+            const tokenResponse = await fetch('/api/auth/student-token', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...data, userType: 'student' }),
+                body: JSON.stringify({ uid: studentDoc.id }),
             });
 
-            if (!response.ok) {
-                const { error } = await response.json();
-                throw new Error(error || 'Failed to login');
+            if (!tokenResponse.ok) {
+                throw new Error('Could not get authentication token.');
+            }
+
+            const { token } = await tokenResponse.json();
+
+            // 4. Sign in with the custom token on the client
+            const userCredential = await signInWithCustomToken(auth, token);
+            const idToken = await userCredential.user.getIdToken();
+
+            // 5. Send the ID token to the server to create a session cookie
+            const sessionResponse = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken, userType: 'student' }),
+            });
+
+            if (!sessionResponse.ok) {
+                const { error } = await sessionResponse.json();
+                throw new Error(error || 'Failed to create session');
             }
             
             router.push('/dashboard');

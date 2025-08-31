@@ -1,65 +1,19 @@
 'use server';
 
-import { getAuth, signInWithEmailAndPassword, signInWithCustomToken } from 'firebase/auth';
 import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAdminApp } from './firebase-admin';
-import { cookies }from 'next/headers';
+import { cookies } from 'next/headers';
 import { Student } from './placeholder-data';
 import { firebaseConfig } from './firebase';
 
 // Initialize Firebase client app
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
 const db = getFirestore(app);
 
-export async function signInWithStudentId(studentId: string, password: string) {
-    const studentsRef = collection(db, 'students');
-    const q = query(studentsRef, where("studentId", "==", studentId));
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-        throw new Error("Student not found.");
-    }
-
-    const studentDoc = querySnapshot.docs[0];
-    const student = studentDoc.data() as Student;
-
-    // In a real app, you would hash and compare passwords.
-    // For this example, we are comparing plaintext.
-    if (student.password !== password) {
-        throw new Error("Invalid password.");
-    }
-
+export async function setAdminClaim(uid: string) {
     const adminAuth = getAdminApp().auth;
-    const customToken = await adminAuth.createCustomToken(studentDoc.id, { role: 'student' });
-    
-    const userCredential = await signInWithCustomToken(auth, customToken);
-    const idToken = await userCredential.user.getIdToken();
-
-    await createSessionCookie(idToken);
-
-    return { success: true, user: { uid: userCredential.user.uid, role: 'student' } };
-}
-
-
-export async function signInWithAdminEmail(email: string, password: string) {
-    // For this app, we will use a simplified admin check.
-    // In a production app, you would have a 'users' collection with roles.
-    if (email !== 'admin@edutraq.com') {
-        throw new Error("Admin user not found.");
-    }
-    
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const idToken = await userCredential.user.getIdToken();
-    const adminAuth = getAdminApp().auth;
-
-    // Set a custom claim for the admin role
-    await adminAuth.setCustomUserClaims(userCredential.user.uid, { role: 'admin' });
-
-    await createSessionCookie(idToken);
-
-    return { success: true, user: { uid: userCredential.user.uid, role: 'admin' } };
+    await adminAuth.setCustomUserClaims(uid, { role: 'admin' });
 }
 
 export async function createSessionCookie(idToken: string) {

@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/icons';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { app } from '@/lib/firebase';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email.'),
@@ -26,6 +28,7 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const auth = getAuth(app);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -38,19 +41,24 @@ export default function AdminLoginPage() {
   const handleLogin = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
+      // 1. Sign in on the client
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      const idToken = await userCredential.user.getIdToken();
+
+      // 2. Send the ID token to the server to create a session cookie
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, userType: 'admin' }),
+        body: JSON.stringify({ idToken, userType: 'admin' }),
       });
 
       if (!response.ok) {
         const { error } = await response.json();
-        throw new Error(error || 'Failed to login');
+        throw new Error(error || 'Failed to create session');
       }
       
       router.push('/admin/dashboard');
-      router.refresh(); // This helps to re-run the middleware and server components
+      router.refresh(); 
     } catch (error: any) {
       toast({
         variant: 'destructive',
