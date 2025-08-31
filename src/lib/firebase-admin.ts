@@ -14,7 +14,7 @@ if (!admin.apps.length) {
       credential: admin.credential.cert(serviceAccount),
     });
 } else {
-    adminApp = admin.app();
+    adminApp = admin.apps[0] as admin.app.App;
 }
 
 
