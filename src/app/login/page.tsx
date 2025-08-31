@@ -7,8 +7,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { getAuth, signInWithCustomToken } from 'firebase/auth';
-import { collection, query, where, getDocs, getFirestore } from 'firebase/firestore';
+import { signInWithCustomToken } from 'firebase/auth';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/icons';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { app } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import type { Student } from '@/lib/placeholder-data';
 
 const loginSchema = z.object({
@@ -31,8 +31,6 @@ export default function StudentLoginPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
