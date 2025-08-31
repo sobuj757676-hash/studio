@@ -1,13 +1,13 @@
+
 'use server';
 
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAdminApp } from './firebase-admin';
 import { cookies } from 'next/headers';
-import { Student } from './placeholder-data';
 import { firebaseConfig } from './firebase';
 
-// Initialize Firebase client app
+// Initialize Firebase client app for server-side use where needed
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
