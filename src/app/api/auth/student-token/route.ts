@@ -10,6 +10,7 @@ export async function POST(request: Request) {
     }
 
     const adminAuth = getAdminApp().auth;
+    // Add the { role: 'student' } claim to the custom token
     const customToken = await adminAuth.createCustomToken(uid, { role: 'student' });
     
     return NextResponse.json({ token: customToken });
